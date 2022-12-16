@@ -8,6 +8,12 @@ MEMORY
 
 SECTIONS
 {
+    .isr_stm :
+    {
+        . = ALIGN(4);
+        KEEP(*(.isr_stm))
+        . = ALIGN(4);
+    } > FLASH
     .data :
     {
         . = ALIGN(4);
@@ -20,12 +26,6 @@ SECTIONS
         *(.bss)
         *(.bss*)
     } > RAM
-    .isr_stm :
-    {
-        . = ALIGN(4);
-        KEEP(*(.isr_stm))
-        . = ALIGN(4);
-    } > FLASH
     .text :
     {
         *(.text)
