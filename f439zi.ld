@@ -27,6 +27,7 @@ SECTIONS
         . = ALIGN(4);
         *(.data)
         *(.data*)
+        *(.ram_text)
     } > RAM AT> FLASH
     ld_data_source = LOADADDR(.data);
     ld_data_destination = ADDR(.data);

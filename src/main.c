@@ -10,7 +10,7 @@ int glov2;
 static int stav1 = 25;
 static int stav2;
 
-static void
+static void __attribute__((section (".ram_text")))
 delay(void)
 {
 	for (int i = 0; i < 0x000fffff; ++i)
