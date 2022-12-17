@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include <main.h>
+#include <clock.h>
 
 extern void *stack_pointer;
 extern void *ld_data_source, *ld_data_destination, *ld_data_size; 
@@ -21,6 +22,7 @@ static void init_memory(void)
 	dest = (volatile uint32_t *) &ld_bss_destination;
 	for (uint32_t i = 0; i < (uint32_t) &ld_bss_size / sizeof(uint32_t); ++i)
 		dest[i] = 0u;
+	init_clock();
 	src = (volatile const uint32_t *) &ld_ram_text_source;
 	dest = (volatile uint32_t *) &ld_ram_text_destination;
 	for (uint32_t i = 0; i < (uint32_t) &ld_ram_text_size / sizeof(uint32_t); ++i)
