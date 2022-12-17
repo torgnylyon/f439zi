@@ -5,6 +5,7 @@
 extern void *stack_pointer;
 extern void *ld_data_source, *ld_data_destination, *ld_data_size; 
 extern void *ld_bss_destination, *ld_bss_size; 
+extern void *ld_ram_text_source, *ld_ram_text_destination, *ld_ram_text_size; 
 
 static void sw_break(void)
 {
@@ -13,13 +14,17 @@ static void sw_break(void)
 
 static void init_memory(void)
 {
-    volatile const uint32_t *src = (volatile const uint32_t *) &ld_data_source;
-    volatile uint32_t *dest = (volatile uint32_t *) &ld_data_destination;
-    for (uint32_t i = 0; i < (uint32_t) &ld_data_size / sizeof(uint32_t); ++i)
-        dest[i] = src[i];
-    dest = (volatile uint32_t *) &ld_bss_destination;
-    for (uint32_t i = 0; i < (uint32_t) &ld_bss_size / sizeof(uint32_t); ++i)
-        dest[i] = 0u;
+	volatile const uint32_t *src = (volatile const uint32_t *) &ld_data_source;
+	volatile uint32_t *dest = (volatile uint32_t *) &ld_data_destination;
+	for (uint32_t i = 0; i < (uint32_t) &ld_data_size / sizeof(uint32_t); ++i)
+		dest[i] = src[i];
+	dest = (volatile uint32_t *) &ld_bss_destination;
+	for (uint32_t i = 0; i < (uint32_t) &ld_bss_size / sizeof(uint32_t); ++i)
+		dest[i] = 0u;
+	src = (volatile const uint32_t *) &ld_ram_text_source;
+	dest = (volatile uint32_t *) &ld_ram_text_destination;
+	for (uint32_t i = 0; i < (uint32_t) &ld_ram_text_size / sizeof(uint32_t); ++i)
+		dest[i] = src[i];
 }
 
 void __attribute__ ((naked))
