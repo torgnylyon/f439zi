@@ -30,22 +30,48 @@ reset(void)
 void
 nmi(void)
 {
+    asm volatile ("bkpt #0");
 }
 
 void
 hard_fault(void)
 {
-	while (1)
-		;
+    asm volatile ("bkpt #0");
+    while (1)
+        ;
+}
+
+void
+mem_manage(void)
+{
+    asm volatile ("bkpt #0");
+    while (1)
+        ;
+}
+
+void
+bus_fault(void)
+{
+    asm volatile ("bkpt #0");
+    while (1)
+        ;
+}
+
+void
+usage_fault(void)
+{
+    asm volatile ("bkpt #0");
+    while (1)
+        ;
 }
 
 __attribute__ ((section (".isr_stm"))) uint32_t v[128] = {
-	0x2001bfd0,
-	(uint32_t) &reset,
-	(uint32_t) hard_fault,
-	(uint32_t) hard_fault,
-	(uint32_t) hard_fault,
-	(uint32_t) hard_fault,
-	(uint32_t) hard_fault,
-	0x0
+    0x2001bfd0,
+    (uint32_t) &reset,
+    (uint32_t) &nmi,
+    (uint32_t) &hard_fault,
+    (uint32_t) &mem_manage,
+    (uint32_t) &bus_fault,
+    (uint32_t) &usage_fault,
+    0x0
 };
