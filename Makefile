@@ -1,18 +1,20 @@
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
-CFLAGS=-mfloat-abi=soft -mcpu=cortex-m4 -O0 -g3 -gdwarf-5 -mthumb 
-INCLUDE=-I inc
-OBJS = main.o startup.o
 
+CFLAGS= \
+-mfloat-abi=soft -mcpu=cortex-m4 -O0 -g3 -gdwarf-5 -mthumb \
+-Wall -Wextra -Wsign-conversion -Wconversion -Wpedantic -std=gnu18
 
-f439zi.elf: $(OBJS)
-	$(CC) -T f439zi.ld -o $@ $(OBJS) -lnosys -nostdlib -Xlinker -Map=f439zi.map
+INC= \
+-I inc
 
-startup.o: src/startup.c
-	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ src/startup.c
+SRC = \
+src/main.c \
+src/startup.c
 
-main.o: src/main.c
-	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ src/main.c
+all:
+	$(CC) -T f439zi.ld -o f439zi.elf $(SRC) $(CFLAGS) $(INC) -nostdlib -Xlinker -Map=f439zi.map
 
+.PHONY: clean
 clean:
-	-rm -f $(OBJS)
+	-rm -f f439zi.elf f439zi.map
