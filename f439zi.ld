@@ -14,21 +14,27 @@ SECTIONS
         KEEP(*(.isr_stm))
         . = ALIGN(4);
     } > FLASH
-    .data :
-    {
-        . = ALIGN(4);
-        *(.data)
-        *(.data*)
-    } > RAM AT> FLASH
     .bss :
     {
         . = ALIGN(4);
         *(.bss)
         *(.bss*)
     } > RAM
+    ld_bss_destination = ADDR(.bss);
+    ld_bss_size = SIZEOF(.bss);
+    .data :
+    {
+        . = ALIGN(4);
+        *(.data)
+        *(.data*)
+    } > RAM AT> FLASH
+    ld_data_source = LOADADDR(.data);
+    ld_data_destination = ADDR(.data);
+    ld_data_size = SIZEOF(.data);
     .text :
     {
         *(.text)
         *(.text*)
     } > FLASH
+    stack_pointer = ORIGIN(RAM) +  LENGTH(RAM);
 } 

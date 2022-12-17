@@ -2,18 +2,24 @@
 
 #include <main.h>
 
+extern void *stack_pointer;
+extern void *ld_data_source, *ld_data_destination, *ld_data_size; 
+extern void *ld_bss_destination, *ld_bss_size; 
+
 static void sw_break(void)
 {
 	asm volatile ("bkpt #0");
-	asm volatile ("ldr sp, =0x2001bf00");
-	asm volatile ("bkpt #1");
-	asm volatile ("ldr sp, =0x2001b000");
-	asm volatile ("bkpt #2");
 }
 
 static void init_memory(void)
 {
-
+    volatile const uint32_t *src = (volatile const uint32_t *) &ld_data_source;
+    volatile uint32_t *dest = (volatile uint32_t *) &ld_data_destination;
+    for (uint32_t i = 0; i < (uint32_t) &ld_data_size / sizeof(uint32_t); ++i)
+        dest[i] = src[i];
+    dest = (volatile uint32_t *) &ld_bss_destination;
+    for (uint32_t i = 0; i < (uint32_t) &ld_bss_size / sizeof(uint32_t); ++i)
+        dest[i] = 0u;
 }
 
 void __attribute__ ((naked))
@@ -66,7 +72,7 @@ usage_fault(void)
 }
 
 __attribute__ ((section (".isr_stm"))) uint32_t v[128] = {
-    0x2001bfd0,
+    (uint32_t) &stack_pointer,
     (uint32_t) &reset,
     (uint32_t) &nmi,
     (uint32_t) &hard_fault,
