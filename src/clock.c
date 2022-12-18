@@ -12,4 +12,9 @@ void init_clock(void)
 {
 	/* Enable AHB1 */
 	*RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+	__sync_synchronize(); /* This GCC built-in function issues a full memory barrier */
+
+	/* wait at least one cycle */
+	volatile uint32_t tmpreg = *RCC_AHB1ENR;
+	(void)tmpreg;
 }

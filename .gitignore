@@ -1,2 +1,4 @@
 f439zi.elf 
 f439zi.map
+.vscode/.cortex-debug.registers.state.json
+.vscode/.cortex-debug.peripherals.state.json
