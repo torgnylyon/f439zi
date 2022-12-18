@@ -13,7 +13,7 @@ static int stav2;
 static void __attribute__((section (".ram_text")))
 delay(void)
 {
-	for (int i = 0; i < 0x000fffff; ++i)
+	for (volatile int32_t i = 0; i < 0x000fffff; ++i)
 		;
 }
 
