@@ -1,9 +1,16 @@
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
+DEBUG=TRUE
 
 CFLAGS= \
--mfloat-abi=soft -mcpu=cortex-m4 -O0 -g3 -gdwarf-5 -mthumb \
+-mfloat-abi=soft -mcpu=cortex-m4 -mthumb \
 -Wall -Wextra -Wsign-conversion -Wconversion -Wpedantic -std=gnu18
+
+ifeq ($(DEBUG), TRUE)
+	CFLAGS += -O0 -g3 -gdwarf-5
+else
+	CFLAGS += -O2
+endif
 
 INC= \
 -I inc

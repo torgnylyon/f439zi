@@ -41,6 +41,12 @@ SECTIONS
         *(.text*)
     } > FLASH
 
+    .rodata :
+    {
+        *(.rodata)
+        *(.rodata*)
+    } > FLASH
+
     .ram_text :
     {
         *(.ram_text)
