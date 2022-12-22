@@ -34,6 +34,15 @@ void __attribute__ ((naked))
 reset(void)
 {
 	asm volatile ("bkpt #0");
+
+    /* Enable FPU */
+    const uint32_t CPACR_Addr = 0xE000ED88UL;
+    volatile uint32_t *const CPACR = (volatile uint32_t *const)CPACR_Addr;
+    const uint32_t CP10_FullAccess = 3UL << (10 * 2);
+    const uint32_t CP11_FullAccess = 3UL << (11 * 2);
+    *CPACR |= CP10_FullAccess | CP11_FullAccess;
+    __sync_synchronize();
+
 	init_memory();
 	main();
 	for ( ; ; ) {

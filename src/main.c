@@ -11,12 +11,18 @@ const int cglov = 11;
 static int stav1 = 25;
 static int stav2;
 static const int csglov = 22;
+volatile float g_floatval = 1.1f;
 
 static void __attribute__((section (".ram_text")))
 delay(void)
 {
 	for (volatile int32_t i = 0; i < 0x000fffff; ++i)
 		;
+}
+
+void add_float(void)
+{
+	g_floatval += 0.1f;
 }
 
 int
@@ -30,6 +36,7 @@ main(void)
 		glov1 += cglov;
 		glov2 += csglov;
 		*(volatile uint32_t *) (GPIOB + GPIO_ODR) ^= 1u;
+		add_float();
 		delay();
 	}
 }
