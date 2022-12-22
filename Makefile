@@ -2,8 +2,7 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 DEBUG=TRUE
 
-CFLAGS= \
--mfloat-abi=soft -mcpu=cortex-m4 -mthumb \
+CFLAGS= -mfloat-abi=soft -mcpu=cortex-m4 -mthumb \
 -Wall -Wextra -Wsign-conversion -Wconversion -Wpedantic -std=gnu18
 
 ifeq ($(DEBUG), TRUE)
