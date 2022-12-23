@@ -22,3 +22,24 @@ void clock_init(void)
 	volatile uint32_t tmpreg = *RCC_AHB1ENR;
 	(void)tmpreg;
 }
+
+static volatile uint32_t s_ticks = 0;
+void clock_tick(void)
+{
+	s_ticks++;
+	__sync_synchronize();
+}
+
+void clock_delayms(uint32_t ms)
+{
+	if (ms == UINT32_MAX) {
+		for ( ; ; ) {
+			/* wait forever */
+		}
+	}
+	ms++; // wait at least requested delay
+	const uint32_t original_ticks = s_ticks;
+	while ((s_ticks - original_ticks) < ms) {
+		/* wait ms */
+	}
+}
