@@ -14,12 +14,14 @@ static int stav2;
 static const int csglov = 22;
 volatile float g_floatval = 1.1f;
 
-// static void __attribute__((section (".ram_text"))) why is it broken?
-// delay(void)
-// {
-// 	for (volatile int32_t i = 0; i < 0x000fff; ++i)
-// 		;
-// }
+__attribute__((long_call, section (".ram_text")))
+static void delay(void)
+{
+	for (volatile int32_t i = 0; i < 0x000fffff; ++i) {
+		i++;
+		i--;
+	}
+}
 
 void add_float(void)
 {
@@ -38,7 +40,7 @@ main(void)
 		glov2 += csglov;
 		*(volatile uint32_t *) (GPIOB + GPIO_ODR) ^= 1u;
 		add_float();
-		// delay();
+		delay();
 		clock_delayms(500);
 	}
 }

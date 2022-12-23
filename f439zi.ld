@@ -21,6 +21,7 @@ SECTIONS
         . = ALIGN(4);
         *(.bss)
         *(.bss*)
+        . = ALIGN(4);
     } > RAM
     ld_bss_destination = ADDR(.bss);
     ld_bss_size = SIZEOF(.bss);
@@ -30,6 +31,7 @@ SECTIONS
         . = ALIGN(4);
         *(.data)
         *(.data*)
+        . = ALIGN(4);
     } > CCM AT> FLASH
     ld_data_source = LOADADDR(.data);
     ld_data_destination = ADDR(.data);
@@ -37,19 +39,25 @@ SECTIONS
 
     .text :
     {
+        . = ALIGN(4);
         *(.text)
         *(.text*)
+        . = ALIGN(4);
     } > FLASH
 
     .rodata :
     {
+        . = ALIGN(4);
         *(.rodata)
         *(.rodata*)
+        . = ALIGN(4);
     } > FLASH
 
     .ram_text :
     {
+        . = ALIGN(4);
         *(.ram_text)
+        . = ALIGN(4);
     } > RAM AT > FLASH
 
     ld_ram_text_source = LOADADDR(.ram_text);
