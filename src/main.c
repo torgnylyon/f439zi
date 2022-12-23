@@ -14,12 +14,17 @@ static int stav2;
 static const int csglov = 22;
 volatile float g_floatval = 1.1f;
 
+static void scfucn(void)
+{
+	static volatile long v = 1;
+	v++;
+}
+
 __attribute__((long_call, section (".ram_text")))
 static void delay(void)
 {
-	for (volatile int32_t i = 0; i < 0x000fffff; ++i) {
-		i++;
-		i--;
+	for (int32_t i = 0; i < 0x000ffff; ++i) {
+		scfucn();
 	}
 }
 

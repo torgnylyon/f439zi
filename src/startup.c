@@ -119,7 +119,26 @@ mem_manage(void)
 void
 bus_fault(void)
 {
-    asm volatile ("bkpt #0");
+    SWBKPT();
+
+    /* Configurable Fault Status Register */
+    const uint32_t CFSR_addr = 0xE000ED28UL;
+    uint32_t CFSR = *((volatile uint32_t *const)CFSR_addr);
+    uint32_t MMFSR = 0xFF & CFSR;
+    uint32_t BFSR = 0xFF & (CFSR >> 8);
+    uint32_t UFSR = 0xFFFF & (CFSR >> 16);
+    (void)MMFSR; (void)BFSR; (void)UFSR;
+
+    /* MemManage Fault Address Register */
+    const uint32_t MMFAR_addr = 0xE000ED34UL;
+    uint32_t MMFAR = *((volatile uint32_t *const)MMFAR_addr);
+    (void)MMFAR;
+
+    /* BusFault Address Register */
+    const uint32_t BFAR_addr = 0xE000ED38UL;
+    uint32_t BFAR = *((volatile uint32_t *const)BFAR_addr);
+    (void)BFAR;
+
     while (1)
         ;
 }
@@ -138,7 +157,7 @@ usage_fault(void)
     (void)MMFSR; (void)BFSR; (void)UFSR;
 
     /* MemManage Fault Address Register */
-    const uint32_t MMFAR_addr = 0xE000ED38UL;
+    const uint32_t MMFAR_addr = 0xE000ED34UL;
     uint32_t MMFAR = *((volatile uint32_t *const)MMFAR_addr);
     (void)MMFAR;
 
