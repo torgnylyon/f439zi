@@ -1,6 +1,7 @@
 #include <stdint.h>
 
-#include <main.h>
+#include "main.h"
+#include "clock.h"
 
 
 extern void const *const stack_pointer;
@@ -15,25 +16,26 @@ extern void const *const ld_ram_text_size;
 
 static void init_memory(void)
 {
-	volatile const uint32_t *src = (volatile const uint32_t *) &ld_data_source;
-	volatile uint32_t *dest = (volatile uint32_t *) &ld_data_destination;
-	for (uint32_t i = 0; i < (uint32_t) &ld_data_size / sizeof(uint32_t); ++i)
-		dest[i] = src[i];
+    volatile const uint32_t *src = (volatile const uint32_t *) &ld_data_source;
+    volatile uint32_t *dest = (volatile uint32_t *) &ld_data_destination;
+    for (uint32_t i = 0; i < (uint32_t) &ld_data_size / sizeof(uint32_t); ++i)
+        dest[i] = src[i];
 
-	dest = (volatile uint32_t *) &ld_bss_destination;
-	for (uint32_t i = 0; i < (uint32_t) &ld_bss_size / sizeof(uint32_t); ++i)
-		dest[i] = 0u;
+    dest = (volatile uint32_t *) &ld_bss_destination;
+    for (uint32_t i = 0; i < (uint32_t) &ld_bss_size / sizeof(uint32_t); ++i)
+        dest[i] = 0u;
 
-	src = (volatile const uint32_t *) &ld_ram_text_source;
-	dest = (volatile uint32_t *) &ld_ram_text_destination;
-	for (uint32_t i = 0; i < (uint32_t) &ld_ram_text_size / sizeof(uint32_t); ++i)
-		dest[i] = src[i];
+    src = (volatile const uint32_t *) &ld_ram_text_source;
+    dest = (volatile uint32_t *) &ld_ram_text_destination;
+    for (uint32_t i = 0; i < (uint32_t) &ld_ram_text_size / sizeof(uint32_t); ++i)
+        dest[i] = src[i];
 }
 
 void __attribute__ ((naked))
 reset(void)
 {
-	asm volatile ("bkpt #0");
+    asm volatile ("bkpt #0");
+    init_memory();
 
     /* Enable FPU */
     const uint32_t CPACR_Addr = 0xE000ED88UL;
@@ -43,11 +45,11 @@ reset(void)
     *CPACR |= CP10_FullAccess | CP11_FullAccess;
     __sync_synchronize();
 
-	init_memory();
-	main();
-	for ( ; ; ) {
+    /* main should not return */
+    main();
+    for ( ; ; ) {
 
-	}
+    }
 }
 
 void

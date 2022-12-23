@@ -1,5 +1,7 @@
-#include "clock.h"
 #include <stdint.h>
+
+#include "clock.h"
+
 
 #define AHB1_RCC_BASE		0x40023800UL
 #define RCC_AHB1ENR_OFFSET	0x30
@@ -8,7 +10,7 @@
 #define RCC_AHB1ENR_ADDR	(AHB1_RCC_BASE + RCC_AHB1ENR_OFFSET)
 
 
-void init_clock(void)
+void clock_init(void)
 {
 	volatile uint32_t *const RCC_AHB1ENR = (volatile uint32_t *const)(RCC_AHB1ENR_ADDR);
 

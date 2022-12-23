@@ -4,6 +4,7 @@
 #include "clock.h"
 #include "gpio.h"
 
+
 int glov1 = 3;
 int glov2;
 const int cglov = 11;
@@ -28,7 +29,7 @@ void add_float(void)
 int
 main(void)
 {
-	init_clock();
+	clock_init();
 	*(volatile uint32_t *) (GPIOB + GPIO_MODER) |= 1;
 	while (1) {
 		stav1++;

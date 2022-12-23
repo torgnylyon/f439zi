@@ -12,7 +12,7 @@ else
 endif
 
 INC= \
--I inc
+-iquote inc
 
 SRC = \
 src/main.c \
