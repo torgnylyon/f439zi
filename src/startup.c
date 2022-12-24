@@ -41,7 +41,7 @@ static void systick_init(void)
 {
     /* Enable SysTick: 1. Program reload value */
     const uint32_t SYST_RVR_Addr = 0xE000E014UL;
-    const uint32_t SYST_RVR_RELOAD = 20000UL - 1;
+    const uint32_t SYST_RVR_RELOAD = clock_sysreload_get();
     volatile uint32_t *const SYST_RVR = (volatile uint32_t *const)SYST_RVR_Addr;
     *SYST_RVR = SYST_RVR_RELOAD;
     __sync_synchronize();

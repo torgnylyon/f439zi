@@ -1,11 +1,11 @@
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
-DEBUG=TRUE
+DEBUG=YES
 
 CFLAGS= -mfloat-abi=hard -mcpu=cortex-m4 -mthumb \
 -Wall -Wextra -Wsign-conversion -Wconversion -Wpedantic -std=gnu18
 
-ifeq ($(DEBUG), TRUE)
+ifeq ($(DEBUG), YES)
 	CFLAGS += -O0 -g3 -gdwarf-5
 else
 	CFLAGS += -O2

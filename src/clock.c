@@ -30,7 +30,7 @@ void clock_tick(void)
 	__sync_synchronize();
 }
 
-void clock_delayms(uint32_t ms)
+void clock_delay_ms(uint32_t ms)
 {
 	if (ms == UINT32_MAX) {
 		for ( ; ; ) {
@@ -38,8 +38,48 @@ void clock_delayms(uint32_t ms)
 		}
 	}
 	ms++; // wait at least requested delay
-	const uint32_t original_ticks = s_ticks;
-	while ((s_ticks - original_ticks) < ms) {
+	const uint32_t prev_ticks = s_ticks;
+	while ((s_ticks - prev_ticks) < ms) {
 		/* wait ms */
+	}
+}
+
+static const uint32_t cpu_freq = 16000000UL;
+uint32_t clock_sysreload_get(void)
+{
+	const uint32_t systick_freq = 1000UL;
+	return cpu_freq / systick_freq - 1;
+}
+
+void clock_delay_us(uint32_t us)
+{
+	const uint32_t cnt_per_us = cpu_freq / 1000000;
+	const uint32_t max_us = clock_sysreload_get() / cnt_per_us;
+	if (us >= max_us) {
+		for ( ; ; ) {
+			/* wait forever */
+		}
+	}
+
+	const uint32_t STK_VAL_addr = 0xE000E018UL;
+	volatile uint32_t *const STK_VAL = (volatile uint32_t *const)STK_VAL_addr;
+	const uint32_t cnt_start = *STK_VAL;
+	const uint32_t delay_cnt = us * cnt_per_us;
+	if (delay_cnt < cnt_start) {
+		const uint32_t cnt_stop = cnt_start - delay_cnt;
+		for ( ; ; ) {
+			const uint32_t cnt_curr = *STK_VAL;
+			if ((cnt_curr < cnt_stop) || (cnt_curr > cnt_start)) {
+				break;
+			}
+		}
+	} else {
+		const uint32_t cnt_stop = clock_sysreload_get() - delay_cnt + cnt_start;
+		for ( ; ; ) {
+			const uint32_t cnt_curr = *STK_VAL;
+			if ((cnt_start < cnt_curr) && (cnt_curr < cnt_stop)) {
+				break;
+			}
+		}
 	}
 }

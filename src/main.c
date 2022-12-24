@@ -23,7 +23,7 @@ static void scfucn(void)
 __attribute__((long_call, section (".ram_text")))
 static void delay(void)
 {
-	for (int32_t i = 0; i < 0x000ffff; ++i) {
+	for (int32_t i = 0; i < 0x000fff; ++i) {
 		scfucn();
 	}
 }
@@ -43,9 +43,16 @@ main(void)
 		stav2++;
 		glov1 += cglov;
 		glov2 += csglov;
-		*(volatile uint32_t *) (GPIOB + GPIO_ODR) ^= 1u;
+
 		add_float();
 		delay();
-		clock_delayms(500);
+
+		clock_delay_ms(500);
+		*(volatile uint32_t *) (GPIOB + GPIO_ODR) ^= 1u;
+
+		for (int i = 0; i < 5000; i++) {
+			clock_delay_us(100);
+		}
+		*(volatile uint32_t *) (GPIOB + GPIO_ODR) ^= 1u;
 	}
 }
