@@ -53,6 +53,11 @@ uint32_t clock_sysreload_get(void)
 
 void clock_delay_us(uint32_t us)
 {
+	const uint32_t STK_VAL_addr = 0xE000E018UL;
+	volatile uint32_t *const STK_VAL = (volatile uint32_t *const)STK_VAL_addr;
+	const uint32_t cnt_start = *STK_VAL;
+	__sync_synchronize();
+
 	const uint32_t cnt_per_us = cpu_freq / 1000000;
 	const uint32_t max_us = clock_sysreload_get() / cnt_per_us;
 	if (us >= max_us) {
@@ -61,9 +66,6 @@ void clock_delay_us(uint32_t us)
 		}
 	}
 
-	const uint32_t STK_VAL_addr = 0xE000E018UL;
-	volatile uint32_t *const STK_VAL = (volatile uint32_t *const)STK_VAL_addr;
-	const uint32_t cnt_start = *STK_VAL;
 	const uint32_t delay_cnt = us * cnt_per_us;
 	if (delay_cnt < cnt_start) {
 		const uint32_t cnt_stop = cnt_start - delay_cnt;
