@@ -190,6 +190,11 @@ void systick(void)
     clock_tick();
 }
 
+void TIM1_CC_isr(void)
+{
+
+}
+
 __attribute__ ((section (".isr_stm"))) uint32_t v[128] = {
     (uint32_t) &stack_pointer,
     (uint32_t) &reset,
@@ -206,5 +211,6 @@ __attribute__ ((section (".isr_stm"))) uint32_t v[128] = {
     (uint32_t) &debug_monitor,
     0, // Reserved	0x0000 0034
     (uint32_t) &pendsv,
-    (uint32_t) &systick
+    (uint32_t) &systick,
+    [(0xAC - 0x40) / 4] = (uint32_t) &TIM1_CC_isr
 };
