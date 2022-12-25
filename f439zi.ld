@@ -32,7 +32,7 @@ SECTIONS
         *(.data)
         *(.data*)
         . = ALIGN(4);
-    } > CCM AT> FLASH
+    } > RAM AT> FLASH
     ld_data_source = LOADADDR(.data);
     ld_data_destination = ADDR(.data);
     ld_data_size = SIZEOF(.data);
@@ -63,5 +63,5 @@ SECTIONS
     ld_ram_text_source = LOADADDR(.ram_text);
     ld_ram_text_destination = ADDR(.ram_text);
     ld_ram_text_size = SIZEOF(.ram_text);
-    stack_pointer = ORIGIN(RAM) +  LENGTH(RAM);
+    stack_pointer = ORIGIN(CCM) +  LENGTH(CCM);
 } 
