@@ -3,6 +3,7 @@
 #include "main.h"
 #include "clock.h"
 #include "gpio.h"
+#include "timdma.h"
 
 
 int glov1 = 3;
@@ -37,7 +38,9 @@ int
 main(void)
 {
 	clock_init();
-	*(volatile uint32_t *) (GPIOB + GPIO_MODER) |= 1;
+	timdma_init();
+
+	*(volatile uint32_t *) (GPIOB + GPIO_MODER) |= 1 | (1UL << 2*7);
 	while (1) {
 		stav1++;
 		stav2++;

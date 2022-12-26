@@ -2,6 +2,9 @@
 
 #include "main.h"
 #include "clock.h"
+#include "timdma.h"
+#include "gpio.h"
+
 
 #define SWBKPT()  asm volatile ("bkpt #0")
 
@@ -70,6 +73,36 @@ static void fault_init(void)
     SET_REG_BITS(SHCRS_addr, (SHCRS_USGFAULTENA | SHCRS_BUSFAULTENA | SHCRS_MEMFAULTENA));
 }
 
+static const uint32_t TIM1_CCirq = 1UL << 27;
+static void nvic_init(void)
+{
+    const uint32_t NVIC_ISER_addr = 0xE000E100UL;
+    SET_REG_BITS(NVIC_ISER_addr, TIM1_CCirq);
+}
+
+static void fault_details(void)
+{
+    /* Configurable Fault Status Register */
+    const uint32_t CFSR_addr = 0xE000ED28UL;
+    uint32_t CFSR = *((volatile uint32_t *const)CFSR_addr);
+    uint32_t MMFSR = 0xFF & CFSR;
+    uint32_t BFSR = 0xFF & (CFSR >> 8);
+    uint32_t UFSR = 0xFFFF & (CFSR >> 16);
+    (void)MMFSR; (void)BFSR; (void)UFSR;
+
+    /* MemManage Fault Address Register */
+    const uint32_t MMFAR_addr = 0xE000ED34UL;
+    uint32_t MMFAR = *((volatile uint32_t *const)MMFAR_addr);
+    (void)MMFAR;
+
+    /* BusFault Address Register */
+    const uint32_t BFAR_addr = 0xE000ED38UL;
+    uint32_t BFAR = *((volatile uint32_t *const)BFAR_addr);
+    (void)BFAR;
+
+    SWBKPT();
+}
+
 void __attribute__ ((naked))
 reset(void)
 {
@@ -86,6 +119,7 @@ reset(void)
 
     fault_init();
     systick_init();
+    nvic_init();
 
     /* main should not return */
     main();
@@ -103,7 +137,8 @@ nmi(void)
 void
 hard_fault(void)
 {
-    asm volatile ("bkpt #0");
+    SWBKPT();
+    fault_details();
     while (1)
         ;
 }
@@ -147,25 +182,7 @@ void
 usage_fault(void)
 {
     SWBKPT();
-
-    /* Configurable Fault Status Register */
-    const uint32_t CFSR_addr = 0xE000ED28UL;
-    uint32_t CFSR = *((volatile uint32_t *const)CFSR_addr);
-    uint32_t MMFSR = 0xFF & CFSR;
-    uint32_t BFSR = 0xFF & (CFSR >> 8);
-    uint32_t UFSR = 0xFFFF & (CFSR >> 16);
-    (void)MMFSR; (void)BFSR; (void)UFSR;
-
-    /* MemManage Fault Address Register */
-    const uint32_t MMFAR_addr = 0xE000ED34UL;
-    uint32_t MMFAR = *((volatile uint32_t *const)MMFAR_addr);
-    (void)MMFAR;
-
-    /* BusFault Address Register */
-    const uint32_t BFAR_addr = 0xE000ED38UL;
-    uint32_t BFAR = *((volatile uint32_t *const)BFAR_addr);
-    (void)BFAR;
-
+    fault_details();
     while (1)
         ;
 }
@@ -192,10 +209,14 @@ void systick(void)
 
 void TIM1_CC_isr(void)
 {
-
+    // SWBKPT();
+    // const uint32_t NVIC_ICPRaddr = 0XE000E280UL;
+    // SET_REG_BITS(NVIC_ICPRaddr, TIM1_CCirq);
+    *(volatile uint32_t *const) (GPIOB + GPIO_ODR) ^= 1UL << 7;
+    tim1_sr_clear();
 }
 
-__attribute__ ((section (".isr_stm"))) uint32_t v[128] = {
+__attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
     (uint32_t) &stack_pointer,
     (uint32_t) &reset,
     (uint32_t) &nmi,
@@ -212,5 +233,5 @@ __attribute__ ((section (".isr_stm"))) uint32_t v[128] = {
     0, // Reserved	0x0000 0034
     (uint32_t) &pendsv,
     (uint32_t) &systick,
-    [(0xAC - 0x40) / 4] = (uint32_t) &TIM1_CC_isr
+    [0xAC / 4] = (uint32_t) &TIM1_CC_isr
 };

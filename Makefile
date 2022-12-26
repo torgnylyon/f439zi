@@ -17,7 +17,8 @@ INC= \
 SRC = \
 src/main.c \
 src/startup.c \
-src/clock.c
+src/clock.c \
+src/timdma.c
 
 all:
 	$(CC) -T f439zi.ld -o f439zi.elf $(SRC) $(CFLAGS) $(INC) -nostdlib -Xlinker -Map=f439zi.map
