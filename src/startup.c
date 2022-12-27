@@ -76,8 +76,9 @@ static void fault_init(void)
 static void nvic_init(void)
 {
     const uint32_t TIM1_UP_TIM10_irq = 1UL << 25;
+    const uint32_t TIM1_CC_irq = 1UL << 27;
     const uint32_t NVIC_ISER_addr = 0xE000E100UL;
-    SET_REG_BITS(NVIC_ISER_addr, TIM1_UP_TIM10_irq);
+    SET_REG_BITS(NVIC_ISER_addr, (TIM1_UP_TIM10_irq | TIM1_CC_irq));
 }
 
 static void fault_details(void)
@@ -103,8 +104,8 @@ static void fault_details(void)
     SWBKPT();
 }
 
-void __attribute__ ((naked))
-reset(void)
+__attribute__ ((naked))
+void reset(void)
 {
     SWBKPT();
     init_memory();
@@ -209,9 +210,16 @@ void systick(void)
 
 void TIM1_UP_TIM10_isr(void)
 {
-    *(volatile uint32_t *const) (GPIOB + GPIO_ODR) ^= 1UL << 7;
+    timdma_toggleLED();
     __sync_synchronize();
-    tim1_SR_UIF_clear();
+    tim1_SRIF_clear();
+}
+
+void TIM1_CC_isr(void)
+{
+    timdma_toggleLED();
+    __sync_synchronize();
+    tim1_SRIF_clear();
 }
 
 __attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
@@ -232,4 +240,5 @@ __attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
     (uint32_t) &pendsv,
     (uint32_t) &systick,
     [0xA4 / 4] = (uint32_t) &TIM1_UP_TIM10_isr,
+    [0xAC / 4] = (uint32_t) &TIM1_CC_isr
 };

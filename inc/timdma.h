@@ -2,6 +2,7 @@
 #define TIMER_DMA_H_
 
 void timdma_init(void);
-void tim1_SR_UIF_clear(void);
+void tim1_SRIF_clear(void);
+void timdma_toggleLED(void);
 
 #endif /* TIMER_DMA_H_ */
