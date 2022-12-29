@@ -1,5 +1,7 @@
-#ifndef GPIO_H
-#define GPIO_H
+#ifndef GPIO_H_
+#define GPIO_H_
+
+#include <stdint.h>
 
 #define GPIOA 0x40020000
 #define GPIOB 0x40020400
@@ -18,5 +20,8 @@
 #define GPIO_OSPEEDR 0x08
 #define GPIO_PUPDR   0x0c
 #define GPIO_ODR     0x14
+#define GPIO_BSRR    0x18
+
+#define GPIOB_BSRR    (*((volatile uint32_t *const)(GPIOB + GPIO_BSRR)))
 
 #endif
