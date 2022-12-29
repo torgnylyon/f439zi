@@ -22,7 +22,7 @@ static void scfucn(void)
 }
 
 __attribute__((long_call, section (".ram_text")))
-static void delay(void)
+void delay_ram(void)
 {
 	for (int32_t i = 0; i < 0x000fff; ++i) {
 		scfucn();
@@ -48,7 +48,7 @@ main(void)
 		glov2 += csglov;
 
 		add_float();
-		delay();
+		delay_ram();
 
 		clock_delay_ms(500);
 		*(volatile uint32_t *) (GPIOB + GPIO_ODR) ^= 1u;

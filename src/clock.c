@@ -27,7 +27,6 @@ void clock_init(void)
 	(void)tmpreg;
 
 	*RCC_APB2ENR |= RCC_APB2ENR_TIM1EN;
-	__sync_synchronize();
 	tmpreg = *RCC_APB2ENR;
 }
 
@@ -35,7 +34,6 @@ static volatile uint32_t s_ticks = 0;
 void clock_tick(void)
 {
 	s_ticks++;
-	__sync_synchronize();
 }
 
 void clock_delay_ms(uint32_t ms)

@@ -8,9 +8,7 @@
 
 #define SWBKPT()  asm volatile ("bkpt #0")
 
-#define SET_REG_BITS(addr, bits)               \
-*(volatile uint32_t *const)(addr) |= (bits);   \
-__sync_synchronize();
+#define SET_REG_BITS(addr, bits)     *(volatile uint32_t *const)(addr) |= (bits)
 
 
 extern void const *const stack_pointer;
@@ -38,6 +36,9 @@ static void init_memory(void)
     dest = (volatile uint32_t *) &ld_ram_text_destination;
     for (uint32_t i = 0; i < (uint32_t) &ld_ram_text_size / sizeof(uint32_t); ++i)
         dest[i] = src[i];
+
+    asm volatile ("ISB" : : : "memory"); // Ensure instruction fetch path sees new I-Cache state
+    delay_ram();
 }
 
 static void systick_init(void)
@@ -108,6 +109,7 @@ __attribute__ ((naked))
 void reset(void)
 {
     SWBKPT();
+    asm volatile ("cpsid i" : : : "memory"); // Disable IRQ interrupts by setting the I-bit in the CPSR
     init_memory();
 
     /* Enable FPU */
@@ -116,7 +118,8 @@ void reset(void)
     const uint32_t CP10_FullAccess = 3UL << (10 * 2);
     const uint32_t CP11_FullAccess = 3UL << (11 * 2);
     *CPACR |= CP10_FullAccess | CP11_FullAccess;
-    __sync_synchronize();
+
+    asm volatile ("cpsie i" : : : "memory"); // Enable IRQ interrupts by clearing the I-bit in the CPSR
 
     fault_init();
     systick_init();
@@ -211,15 +214,15 @@ void systick(void)
 void TIM1_UP_TIM10_isr(void)
 {
     timdma_toggleLED();
-    __sync_synchronize();
     tim1_SRIF_clear();
+    asm volatile ("DSB" : : : "memory"); // Ensure completion of the stores before leaving interrupt context
 }
 
 void TIM1_CC_isr(void)
 {
     timdma_toggleLED();
-    __sync_synchronize();
     tim1_SRIF_clear();
+    asm volatile ("DSB" : : : "memory"); // Ensure completion of the stores before leaving interrupt context
 }
 
 __attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
