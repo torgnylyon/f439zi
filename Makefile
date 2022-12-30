@@ -1,17 +1,17 @@
-CC=arm-none-eabi-gcc
-LD=arm-none-eabi-ld
-DEBUG=YES
+CC = arm-none-eabi-gcc
+LD = arm-none-eabi-ld
+DEBUG_ENABLED = YES
 
-CFLAGS= -mfloat-abi=hard -mcpu=cortex-m4 -mthumb \
+CFLAGS = -mfloat-abi=hard -mcpu=cortex-m4 -mthumb \
 -Wall -Wextra -Wsign-conversion -Wconversion -Wpedantic -std=gnu18
 
-ifeq ($(DEBUG), YES)
+ifeq ($(DEBUG_ENABLED), YES)
 	CFLAGS += -O0 -g3 -gdwarf-5
 else
-	CFLAGS += -O2
+	CFLAGS += -O2 -g0
 endif
 
-INC= \
+INC = \
 -iquote inc
 
 SRC = \

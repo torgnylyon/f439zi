@@ -106,7 +106,7 @@ static void fault_details(void)
 }
 
 __attribute__ ((naked))
-void reset(void)
+void myreset(void)
 {
     SWBKPT();
     asm volatile ("cpsid i" : : : "memory"); // Disable IRQ interrupts by setting the I-bit in the CPSR
@@ -227,7 +227,7 @@ void TIM1_CC_isr(void)
 
 __attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
     (uint32_t) &stack_pointer,
-    (uint32_t) &reset,
+    (uint32_t) &myreset,
     (uint32_t) &nmi,
     (uint32_t) &hard_fault,
     (uint32_t) &mem_manage,

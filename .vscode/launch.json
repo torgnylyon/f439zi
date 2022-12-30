@@ -10,14 +10,14 @@
 			"executable": "./f439zi.elf",
 			"request": "launch",
 			"type": "cortex-debug",
-			"runToEntryPoint": "main",
+			"runToEntryPoint": "myreset",
 			"svdFile": "./doc/STM32F439.svd",
 			"servertype": "openocd",
 			"configFiles": [
 				"interface/stlink.cfg",
 				"target/stm32f4x.cfg"
 			],
-			"gdbPath": "gdb-multiarch"
+			"gdbPath": "arm-none-eabi-gdb"
 		}
 	]
 }
