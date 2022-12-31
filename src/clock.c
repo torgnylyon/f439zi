@@ -17,9 +17,11 @@ void clock_init(void)
 {
 	volatile uint32_t *const RCC_AHB1ENR = (volatile uint32_t *const)(RCC_AHB1ENR_ADDR);
 	volatile uint32_t *const RCC_APB2ENR = (volatile uint32_t *const)(RCC_APB2ENR_ADDR);
+	const uint32_t RCC_AHB1ENR_DMA1EN = 1UL << 21;
+	const uint32_t RCC_AHB1ENR_DMA2EN = 1UL << 22;
 
 	/* Enable AHB1 */
-	*RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+	*RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_DMA1EN | RCC_AHB1ENR_DMA2EN;
 	__sync_synchronize(); /* This GCC built-in function issues a full memory barrier */
 
 	/* wait at least one cycle */

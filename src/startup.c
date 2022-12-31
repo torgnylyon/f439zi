@@ -220,7 +220,8 @@ void TIM1_UP_TIM10_isr(void)
 
 void TIM1_CC_isr(void)
 {
-    GPIOB_BSRR = 1UL << 7;
+    // GPIOB_BSRR = 1UL << 7;
+    timdma_setreg();
     tim1_SRIF_clear();
     asm volatile ("DSB" : : : "memory"); // Ensure completion of the stores before leaving interrupt context
 }
