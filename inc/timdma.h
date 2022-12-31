@@ -5,5 +5,6 @@ void timdma_init(void);
 void tim1_SRIF_clear(void);
 void timdma_toggleLED(void);
 void timdma_setreg(void);
+void timdma_resetreg(void);
 
 #endif /* TIMER_DMA_H_ */

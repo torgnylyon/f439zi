@@ -17,7 +17,6 @@ static const uint16_t TIM1_DIER_UIE = 1;
 static const uint16_t TIM1_DIER_CC1IE = 1 << 1;
 
 static const uint32_t DMA2_addr = 0x40026400UL;
-static volatile uint32_t *const DMA2_S0CR = (volatile uint32_t *const)(DMA2_addr + 0x10 + 0x18 * 0);
 static const uint32_t DMA_SxCR_EN = 1;
 static const uint32_t DMA_SxCR_CHSEL = 3UL << 25;
 static const uint32_t DMA_SxCR_PFCTRL = 1UL << 5;
@@ -27,10 +26,16 @@ static const uint32_t DMA_SxCR_PSIZE = 2UL << 11;
 static const uint32_t DMA_SxCR_DIR = 2UL << 6;
 static volatile uint32_t *const DMA2_LIFCR = (volatile uint32_t *const)(DMA2_addr + 0x08);
 static volatile uint32_t *const DMA2_HIFCR = (volatile uint32_t *const)(DMA2_addr + 0x0C);
+static volatile uint32_t *const DMA2_S0CR = (volatile uint32_t *const)(DMA2_addr + 0x10 + 0x18 * 0);
 static volatile uint32_t *const DMA2_S0PAR = (volatile uint32_t *const)(DMA2_addr + 0x18 + 0x18 * 0);
 static volatile uint32_t *const DMA2_S0MA0R = (volatile uint32_t *const)(DMA2_addr + 0x1C + 0x18 * 0);
 static volatile uint32_t *const DMA2_S0NDTR = (volatile uint32_t *const)(DMA2_addr + 0x14 + 0x18 * 0);
+static volatile uint32_t *const DMA2_S1CR = (volatile uint32_t *const)(DMA2_addr + 0x10 + 0x18 * 1);
+static volatile uint32_t *const DMA2_S1PAR = (volatile uint32_t *const)(DMA2_addr + 0x18 + 0x18 * 1);
+static volatile uint32_t *const DMA2_S1MA0R = (volatile uint32_t *const)(DMA2_addr + 0x1C + 0x18 * 1);
+static volatile uint32_t *const DMA2_S1NDTR = (volatile uint32_t *const)(DMA2_addr + 0x14 + 0x18 * 1);
 static const uint32_t s_gpio_setreg = 1UL << 7;
+static const uint32_t s_gpio_resetreg = 1UL << (7 + 16);
 
 void timdma_setreg(void)
 {
@@ -46,12 +51,22 @@ void timdma_setreg(void)
     *DMA2_S0CR |= DMA_SxCR_EN; // Enable DMA
 }
 
-void timdma_init(void)
+void timdma_resetreg(void)
 {
-    *DMA2_S0CR &= ~DMA_SxCR_EN; // Disable DMA
-    while (((*DMA2_S0CR) & DMA_SxCR_EN) != 0) {
+    *DMA2_S1CR &= ~DMA_SxCR_EN; // Disable DMA
+    while (((*DMA2_S1CR) & DMA_SxCR_EN) != 0) {
         ; // wait until DMA is disabled
     }
+    __sync_synchronize();
+    *DMA2_LIFCR = ~0UL;
+    *DMA2_HIFCR = ~0UL;
+    *DMA2_S1NDTR = 1;
+    __sync_synchronize();
+    *DMA2_S1CR |= DMA_SxCR_EN; // Enable DMA
+}
+
+void timdma_init(void)
+{
     *DMA2_S0MA0R = GPIOB + GPIO_BSRR;
     *DMA2_S0PAR = (uint32_t)&s_gpio_setreg;
     *DMA2_S0CR &= ~DMA_SxCR_CHSEL; // Select channel 0
@@ -60,6 +75,15 @@ void timdma_init(void)
     *DMA2_S0CR |= DMA_SxCR_MSIZE; // Memory data size word (32-bit)
     *DMA2_S0CR |= DMA_SxCR_PSIZE; // Peripheral data size word (32-bit)
     *DMA2_S0CR |= DMA_SxCR_DIR; // Data transfer direction Memory-to-memory
+
+    *DMA2_S1MA0R = GPIOB + GPIO_BSRR;
+    *DMA2_S1PAR = (uint32_t)&s_gpio_resetreg;
+    *DMA2_S1CR &= ~DMA_SxCR_CHSEL; // Select channel 0
+    *DMA2_S1CR &= ~DMA_SxCR_PFCTRL; // The DMA is the flow controller
+    *DMA2_S1CR &= ~DMA_SxCR_PL; // Priority level low
+    *DMA2_S1CR |= DMA_SxCR_MSIZE; // Memory data size word (32-bit)
+    *DMA2_S1CR |= DMA_SxCR_PSIZE; // Peripheral data size word (32-bit)
+    *DMA2_S1CR |= DMA_SxCR_DIR; // Data transfer direction Memory-to-memory
     __sync_synchronize();
 
     *TIM1_SR = 0;
