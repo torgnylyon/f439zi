@@ -76,22 +76,31 @@ void timdma_init(void)
     *DMA2_S0CR |= DMA_SxCR_PSIZE; // Peripheral data size word (32-bit)
     *DMA2_S0CR |= DMA_SxCR_DIR; // Data transfer direction Memory-to-memory
 
-    *DMA2_S6MA0R = GPIOB + GPIO_BSRR;
-    *DMA2_S6PAR = (uint32_t)&s_gpio_resetreg;
+    // *DMA2_S6MA0R = GPIOB + GPIO_BSRR;
+    // *DMA2_S6PAR = (uint32_t)&s_gpio_resetreg;
+    *DMA2_S6MA0R = (uint32_t)&s_gpio_resetreg;
+    *DMA2_S6PAR = GPIOB + GPIO_BSRR;
     *DMA2_S6CR &= ~DMA_SxCR_CHSEL; // Select channel 0
-    *DMA2_S6CR &= ~DMA_SxCR_PFCTRL; // The DMA is the flow controller
+    *DMA2_S6CR |= DMA_SxCR_PFCTRL; // The peripheral is the flow controller
     *DMA2_S6CR &= ~DMA_SxCR_PL; // Priority level low
     *DMA2_S6CR |= DMA_SxCR_MSIZE; // Memory data size word (32-bit)
     *DMA2_S6CR |= DMA_SxCR_PSIZE; // Peripheral data size word (32-bit)
-    *DMA2_S6CR |= DMA_SxCR_DIR; // Data transfer direction Memory-to-memory
+    *DMA2_S6CR |= 1UL << 6; // Bits 7:6 Data transfer direction, 01: Memory-to-peripheral
+    *DMA2_S6CR |= 1UL << 8; // Bit 8 Circular mode, 1: Circular mode enabled
+    *DMA2_S6NDTR = 1; // Number of data items to transfer
+    __sync_synchronize();
+    *DMA2_S6CR |= DMA_SxCR_EN; // Enable DMA
     __sync_synchronize();
 
     *TIM1_SR = 0;
     *TIM1_PSC = 16000UL - 1;
     *TIM1_ARR = 1000UL;
     *TIM1_CCR1 = *TIM1_ARR / 2;
-    *TIM1_DIER |= TIM1_DIER_CC1IE | TIM1_DIER_UIE;
-    __sync_synchronize();
+    // const uint16_t TIMx_DIER_TDE = 1UL << 14; // Trigger DMA request enable
+    const uint16_t TIMx_DIER_CC1DE = 1UL << 9; // Capture/Compare 1 DMA request enable
+    // const uint16_t TIMx_DIER_UDE = 1UL << 8; // Update DMA request enable
+    *TIM1_DIER |= TIM1_DIER_CC1IE | TIM1_DIER_UIE | TIMx_DIER_CC1DE;
+    asm volatile ("DSB" ::: "memory");
     *TIM1_CR1 |= TIM1_CR1_CEN | TIM1_CR1_ARPE;
 }
 
