@@ -11,7 +11,6 @@
 #define SET_REG_BITS(addr, bits)     *(volatile uint32_t *const)(addr) |= (bits)
 
 
-extern void const *const stack_pointer;
 extern void const *const ld_data_source;
 extern void *const ld_data_destination;
 extern void const *const ld_data_size;
@@ -226,7 +225,6 @@ void TIM1_CC_isr(void)
 }
 
 __attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
-    (uint32_t) &stack_pointer,
     (uint32_t) &myreset,
     (uint32_t) &nmi,
     (uint32_t) &hard_fault,
@@ -242,6 +240,6 @@ __attribute__ ((section (".isr_stm"))) uint32_t g_vector_table[256] = {
     0, // Reserved	0x0000 0034
     (uint32_t) &pendsv,
     (uint32_t) &systick,
-    [0xA4 / 4] = (uint32_t) &TIM1_UP_TIM10_isr,
-    [0xAC / 4] = (uint32_t) &TIM1_CC_isr
+    [0xA4 / 4 - 1] = (uint32_t) &TIM1_UP_TIM10_isr,
+    [0xAC / 4 - 1] = (uint32_t) &TIM1_CC_isr
 };

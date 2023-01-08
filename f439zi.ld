@@ -2,40 +2,29 @@ ENTRY(myreset)
 
 MEMORY
 {
-    RAM (rwx)   : ORIGIN = 0x20000000, LENGTH = 0x30000
-    FLASH (rwx) : ORIGIN = 0x08000000, LENGTH = 0x200000
-    CCM (rwx)   : ORIGIN = 0x10000000, LENGTH = 64K
+    RAM   (rwx)   : ORIGIN = 0x20000000, LENGTH = 0x30000
+    FLASH (rwx)   : ORIGIN = 0x08000000, LENGTH = 0x200000
+    CCM   (rw)    : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
 SECTIONS
 {
-    .isr_stm :
+    .isr_stm ORIGIN(FLASH) :
     {
-        . = ALIGN(4);
+        LONG(ORIGIN(CCM) +  LENGTH(CCM)); /* First entry: initial stack pointer value */
         KEEP(*(.isr_stm))
         . = ALIGN(4);
     } > FLASH
 
-    .bss :
+    .ram_text :
     {
         . = ALIGN(4);
-        *(.bss)
-        *(.bss*)
+        *(.ram_text)
         . = ALIGN(4);
-    } > RAM
-    ld_bss_destination = ADDR(.bss);
-    ld_bss_size = SIZEOF(.bss);
-
-    .data :
-    {
-        . = ALIGN(4);
-        *(.data)
-        *(.data*)
-        . = ALIGN(4);
-    } > RAM AT> FLASH
-    ld_data_source = LOADADDR(.data);
-    ld_data_destination = ADDR(.data);
-    ld_data_size = SIZEOF(.data);
+    } > RAM AT > FLASH
+    ld_ram_text_source = LOADADDR(.ram_text);
+    ld_ram_text_destination = ADDR(.ram_text);
+    ld_ram_text_size = SIZEOF(.ram_text);
 
     .text :
     {
@@ -53,15 +42,24 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH
 
-    .ram_text :
+    .data : AT(ADDR(.rodata) + SIZEOF(.rodata))
     {
         . = ALIGN(4);
-        *(.ram_text)
+        *(.data)
+        *(.data*)
         . = ALIGN(4);
-    } > RAM AT > FLASH
+    } > RAM
+    ld_data_source = LOADADDR(.data);
+    ld_data_destination = ADDR(.data);
+    ld_data_size = SIZEOF(.data);
 
-    ld_ram_text_source = LOADADDR(.ram_text);
-    ld_ram_text_destination = ADDR(.ram_text);
-    ld_ram_text_size = SIZEOF(.ram_text);
-    stack_pointer = ORIGIN(CCM) +  LENGTH(CCM);
-} 
+    .bss :
+    {
+        . = ALIGN(4);
+        *(.bss)
+        *(.bss*)
+        . = ALIGN(4);
+    } > RAM
+    ld_bss_destination = ADDR(.bss);
+    ld_bss_size = SIZEOF(.bss);
+}
