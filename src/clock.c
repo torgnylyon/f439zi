@@ -4,10 +4,14 @@
 
 
 #define AHB1_RCC_BASE		0x40023800UL
+#define RCC_CR_OFFSET		0x0
+#define RCC_CFGR_OFFSET		0x08
 #define RCC_AHB1ENR_OFFSET	0x30
 #define RCC_APB2ENR_OFFSET	0x44
 #define RCC_AHB1ENR_GPIOBEN	(1 << 1)
 #define RCC_AHB1ENR_CCDATARAMEN	(1 << 20)
+#define RCC_CR_ADDR		(AHB1_RCC_BASE + RCC_CR_OFFSET)
+#define RCC_CFGR_ADDR		(AHB1_RCC_BASE + RCC_CFGR_OFFSET)
 #define RCC_AHB1ENR_ADDR	(AHB1_RCC_BASE + RCC_AHB1ENR_OFFSET)
 #define RCC_APB2ENR_ADDR	(AHB1_RCC_BASE + RCC_APB2ENR_OFFSET)
 #define RCC_APB2ENR_TIM1EN	1
@@ -15,10 +19,15 @@
 
 void clock_init(void)
 {
+	volatile uint32_t *const RCC_CR = (volatile uint32_t *const)(RCC_CR_ADDR);
+	volatile uint32_t *const RCC_CFGR = (volatile uint32_t *const)(RCC_CFGR_ADDR);
 	volatile uint32_t *const RCC_AHB1ENR = (volatile uint32_t *const)(RCC_AHB1ENR_ADDR);
 	volatile uint32_t *const RCC_APB2ENR = (volatile uint32_t *const)(RCC_APB2ENR_ADDR);
 	const uint32_t RCC_AHB1ENR_DMA1EN = 1UL << 21;
 	const uint32_t RCC_AHB1ENR_DMA2EN = 1UL << 22;
+
+	*RCC_CR |= 1U << 18 | 1U << 16;
+	*RCC_CFGR |= 1U;
 
 	/* Enable AHB1 */
 	*RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_DMA1EN | RCC_AHB1ENR_DMA2EN;
@@ -52,7 +61,7 @@ void clock_delay_ms(uint32_t ms)
 	}
 }
 
-static const uint32_t cpu_freq = 16000000UL;
+static const uint32_t cpu_freq = 8000000UL;
 uint32_t clock_sysreload_get(void)
 {
 	const uint32_t systick_freq = 1000UL;

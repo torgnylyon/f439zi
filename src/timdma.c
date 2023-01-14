@@ -65,7 +65,7 @@ void timdma_init(void)
     __sync_synchronize();
 
     *TIM1_SR = 0;
-    *TIM1_PSC = 16000UL - 1;
+    *TIM1_PSC = 8000UL - 1;
     *TIM1_ARR = 1000UL;
     *TIM1_CCR1 = 500UL;
     *TIM1_CCR2 = 300UL;
