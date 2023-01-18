@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#include "flash.h"
+
 #include "clock.h"
 
 
@@ -54,8 +56,10 @@ void clock_init(void)
 	const uint32_t RCC_AHB1ENR_DMA1EN = 1UL << 21;
 	const uint32_t RCC_AHB1ENR_DMA2EN = 1UL << 22;
 
-	config_main_pll(HSE, 4, 144, PLLP_8, 6);
-
+	*RCC_CFGR |= (5 << 10);
+	*RCC_CFGR |= (4 << 13);
+	set_flash_latency(5);
+	config_main_pll(HSE, 4, 180, PLLP_2, 8);
 	*RCC_CR |= RCC_CR_HSEON | RCC_CR_HSEBYP | RCC_CR_PLLON;
 	*RCC_CFGR |= 2U;
 
@@ -91,7 +95,7 @@ void clock_delay_ms(uint32_t ms)
 	}
 }
 
-static const uint32_t cpu_freq = 36000000UL;
+static const uint32_t cpu_freq = 180000000UL;
 uint32_t clock_sysreload_get(void)
 {
 	const uint32_t systick_freq = 1000UL;

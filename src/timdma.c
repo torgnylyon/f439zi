@@ -65,10 +65,10 @@ void timdma_init(void)
     __sync_synchronize();
 
     *TIM1_SR = 0;
-    *TIM1_PSC = 36000UL - 1;
-    *TIM1_ARR = 1000UL;
-    *TIM1_CCR1 = 500UL;
-    *TIM1_CCR2 = 300UL;
+    *TIM1_PSC = 18000UL - 1;
+    *TIM1_ARR = 10000UL;
+    *TIM1_CCR1 = 5625;
+    *TIM1_CCR2 = 3375;
     const uint16_t TIMx_DIER_CC1DE = 1UL << 9; // Capture/Compare 1 DMA request enable
     const uint16_t TIMx_DIER_CC2DE = 1UL << 10; // Capture/Compare 2 DMA request enable
     *TIM1_DIER |= TIMx_DIER_CC1DE | TIMx_DIER_CC2DE;
